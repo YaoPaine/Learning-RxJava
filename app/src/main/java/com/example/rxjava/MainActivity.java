@@ -74,7 +74,9 @@ public class MainActivity extends AppCompatActivity {
 
 //        thread();
 
-        scheduler();
+//        scheduler();
+//        MapDemo.map();
+        MapDemo.flatMap();
     }
 
     /**
