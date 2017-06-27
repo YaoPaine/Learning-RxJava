@@ -8,8 +8,11 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -65,9 +68,13 @@ public class MainActivity extends AppCompatActivity {
         //建立连接
         observable.subscribe(observer);
 
-        chain();
+//        chain();
 
-        disposable();
+//        disposable();
+
+//        thread();
+
+        scheduler();
     }
 
     /**
@@ -125,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                 e.onNext(2);
                 Log.e(TAG, "subscribe: " + 1);
                 e.onNext(1);
-                Log.e(TAG, "subscribe: onComplete()" );
+                Log.e(TAG, "subscribe: onComplete()");
                 e.onComplete();
                 Log.e(TAG, "subscribe: " + 0);
                 e.onNext(0);
@@ -136,16 +143,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSubscribe(@NonNull Disposable d) {
                 Log.e(TAG, "onSubscribe");
-                this.disposable=d;
+                this.disposable = d;
             }
 
             @Override
             public void onNext(@NonNull Integer integer) {
                 Log.e(TAG, "onNext: " + integer);
-                if (integer==2){
+                if (integer == 2) {
                     Log.e(TAG, "dispose(): ");
                     disposable.dispose();
-                    Log.e(TAG, "isDisposed(): "+disposable.isDisposed() );
+                    Log.e(TAG, "isDisposed(): " + disposable.isDisposed());
                 }
 
             }
@@ -160,5 +167,77 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "onComplete");
             }
         });
+    }
+
+    public void thread() {
+        Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Integer> e) throws Exception {
+                Log.e(TAG, Thread.currentThread().getName());
+                Log.e(TAG, "subscribe: " + 1);
+                e.onNext(1);
+                Log.e(TAG, "onComplete: ");
+                e.onComplete();
+                Log.e(TAG, "subscribe: " + 2);
+                e.onNext(2);
+            }
+        }).subscribe(new Consumer<Integer>() {
+            @Override
+            public void accept(@NonNull Integer integer) throws Exception {
+                Log.e(TAG, Thread.currentThread().getName() + "==accept: " + integer);
+            }
+        });
+
+    }
+
+    /**
+     * 线程调度
+     */
+    public void scheduler() {
+        Observable<Integer> observable = Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Integer> e) throws Exception {
+                Log.e(TAG, "subscribe: " + Thread.currentThread().getName());
+                Log.e(TAG, "emitter: " + 1);
+                e.onNext(1);
+                Log.e(TAG, "emitter: onComplete()");
+                e.onComplete();
+            }
+        });
+
+        Observer<Integer> observer = new Observer<Integer>() {
+
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+                Log.e(TAG, "onSubscribe: " + Thread.currentThread().getName());
+                Log.e(TAG, "onSubscribe: ");
+            }
+
+            @Override
+            public void onNext(@NonNull Integer integer) {
+                Log.e(TAG, "onNext: " + Thread.currentThread().getName());
+                Log.e(TAG, "onNext: " + integer);
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+                Log.e(TAG, "onError: " + Thread.currentThread().getName());
+                Log.e(TAG, "onError: ");
+            }
+
+            @Override
+            public void onComplete() {
+                Log.e(TAG, "onComplete: " + Thread.currentThread().getName());
+                Log.e(TAG, "onComplete: ");
+            }
+        };
+
+        observable.subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
+                .subscribe(observer);
+
+
     }
 }
