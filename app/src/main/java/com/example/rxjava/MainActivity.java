@@ -79,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
 //        MapDemo.flatMap();
 //        ZipDemo.zipOperator();
 //        BackPressureDemo.test3();
-        FlowableDemo.test4();
+//        FlowableDemo.test4();
+        FlowableTest.test1();
     }
 
     /**
