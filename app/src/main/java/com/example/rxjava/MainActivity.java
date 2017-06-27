@@ -77,7 +77,8 @@ public class MainActivity extends AppCompatActivity {
 //        scheduler();
 //        MapDemo.map();
 //        MapDemo.flatMap();
-        ZipDemo.zipOperator();
+//        ZipDemo.zipOperator();
+        BackPressureDemo.test3();
     }
 
     /**
